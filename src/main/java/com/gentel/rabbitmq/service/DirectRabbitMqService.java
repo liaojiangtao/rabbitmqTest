@@ -34,6 +34,9 @@ public class DirectRabbitMqService {
         String createTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         Map<String, Object> map = new HashMap<String, Object>();
 
+        map.put("messageId", messageId);
+        map.put("createTime",createTime);
+
         rabbitTemplate.convertAndSend("TestDirectExchange", "TestDirectRouting", map);
     }
 }
