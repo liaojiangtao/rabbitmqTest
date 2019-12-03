@@ -1,8 +1,6 @@
 package com.gentel.rabbitmq.demo.publishSubscribe;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -10,12 +8,12 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * @author Gentel
- * @description
- * @create 2019-12-02 19:44
+ * @description 发布订阅模式
+ * @create 2019-12-02 19:49
  */
 
 @Slf4j
-public class send {
+public class receive {
     private static final String EXCHANGE_NAME = "logs";
 
     public static void main(String[] args) throws IOException, TimeoutException {
@@ -29,14 +27,17 @@ public class send {
         Channel channel = connection.createChannel();
 
         channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+        String queueName = channel.queueDeclare().getQueue();
+        channel.queueBind(queueName, EXCHANGE_NAME, "key_gentel");
+        log.info(" [*] Waiting for messages. To exit press CTRL+C");
 
-        String message = "hello publish and subscribe.";
-
-        channel.basicPublish(EXCHANGE_NAME, "key_gentel", null, message.getBytes());
-        log.info(" [x] Sent '" + message + "'");
-
-        channel.close();
-        connection.close();
-        System.exit(0);
+        final Consumer consumer = new DefaultConsumer(channel){
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                String message = new String(body, "UTF-8");
+                log.info(" [x] Received '" + message + "'");
+            }
+        };
+        channel.basicConsume(queueName, true, consumer);
     }
 }

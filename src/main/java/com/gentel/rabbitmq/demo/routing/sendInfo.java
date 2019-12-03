@@ -1,4 +1,4 @@
-package com.gentel.rabbitmq.demo.publishSubscribe;
+package com.gentel.rabbitmq.demo.routing;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -10,13 +10,13 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * @author Gentel
- * @description
- * @create 2019-12-02 19:44
+ * @description 路由模式
+ * @create 2019-12-03 8:58
  */
 
 @Slf4j
-public class send {
-    private static final String EXCHANGE_NAME = "logs";
+public class sendInfo {
+    private static final String EXCHANGE_NAME = "direct_logs";
 
     public static void main(String[] args) throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
@@ -28,15 +28,16 @@ public class send {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+        channel.exchangeDeclare(EXCHANGE_NAME, "direct");
 
-        String message = "hello publish and subscribe.";
+        String severity = "INFO";
+        String message = "info message";
 
-        channel.basicPublish(EXCHANGE_NAME, "key_gentel", null, message.getBytes());
-        log.info(" [x] Sent '" + message + "'");
+        channel.basicPublish(EXCHANGE_NAME, severity, null, message.getBytes());
+        log.info(" [x] Sent '" + severity + "':'" + message + "'");
 
         channel.close();
         connection.close();
-        System.exit(0);
     }
+
 }
